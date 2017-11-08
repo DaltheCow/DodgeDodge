@@ -23,11 +23,11 @@ In addition, this project will include:
 This app will consist of two main screens, a menu and game view, and will have nav links to the Github and my LinkedIn. The controls will be left and right arrow keys and also a pause key. The opening screen will be the game menu where it waits for a game to be started. There will be a start button in the middle which will launch the game view.
 
 ## Menu
-[[/images/DodgeDodgeGame.png]]
+![wireframes](https://github.com/DaltheCow/DodgeDodge/blob/master/images/DodgeDodgeMenu.png)
 
 
 ## Gameplay
-[[/images/DodgeDodgeMenu.png]]
+![wireframes](https://github.com/DaltheCow/DodgeDodge/blob/master/images/DodgeDodgeGame.png)
 
 
 ### Architecture and Technologies
