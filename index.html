@@ -56,12 +56,13 @@
         }
       }
 
-      const updateCameraPos = (camera, keyState) => {
+      const updateCameraPos = (camera, keyState, playerMesh) => {
+        const turnSpd = .7
         if (keyState.keydown && !(keyState.left && keyState.right)) {
           if (keyState.right) {
-            keyState.xAccel = .7;
+            keyState.xAccel = turnSpd;
           } else {
-            keyState.xAccel = -.7;
+            keyState.xAccel = -turnSpd;
           }
 
         } else {
@@ -80,22 +81,35 @@
         camera.position.x += keyState.xSpeed;
         camera.rotation.z = -.2 * ( keyState.xSpeed / keyState.maxXSpeed )
         camera.position.z -= 10;
+        playerMesh.position.x = camera.position.x;
+        playerMesh.rotation.z = camera.rotation.z - 2.35;
+        playerMesh.position.z = camera.position.z - 50;
+
       }
 
-      const doSomethingIfGameIsOver = (cubeArray, camera) => {
-        const gameOver = cubeArray.some(cube => cube.position.x)
+      const doSomethingIfGameIsOver = (cubeArray, camera, size) => {
+        const gameOver = cubeArray.some(cube => (
+          cube.position.x < camera.position.x && cube.position.x + size > camera.position.x &&
+          cube.position.z < camera.position.z && cube.position.z + size > camera.position.z
+        ));
+        return gameOver
       }
 
-      const update = (cubeArray, camera, scene, keyState) => {
-        updateCameraPos(camera, keyState)
+      const update = (cubeArray, camera, scene, keyState, playerMesh) => {
+        const cubeSize = 10;
+        updateCameraPos(camera, keyState, playerMesh)
         if (camera.position.z % 500 === 0) {
-          cubeArray = cubeArray.concat(addCubes(scene, camera, 10));
+          cubeArray = cubeArray.concat(addCubes(scene, camera, cubeSize));
         }
         removeCubesBang(cubeArray, scene)
-        doSomethingIfGameIsOver();
+        if (doSomethingIfGameIsOver(cubeArray, camera, cubeSize)) {
+          gameOn = false;
+        }
 
         return cubeArray
       }
+
+      let gameOn = true;
 
       (function(){
         let cubeArray = []
@@ -104,7 +118,7 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
 
-        const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1200);
+        const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 700);
         const scene = new THREE.Scene();
 
         const light = new THREE.AmbientLight(0xffffff, 0.5);
@@ -112,13 +126,64 @@
         const light1 = new THREE.PointLight(0xffffff, 0.5);
         scene.add(light1);
 
+
+        THREE.TetrahedronGeometry = function ( radius, detail ) {
+
+            var vertices = [ 0,  0,  0,   0, 1,  0,   1,  0, 0,    0, 0, 1];
+            var indices = [ 2,  1,  0,    0,  3,  2,    1,  3,  0,    2,  3,  1];
+
+            THREE.PolyhedronGeometry.call( this, vertices, indices, radius, detail );
+        };
+
+        THREE.TetrahedronGeometry.prototype = Object.create( THREE.Geometry.prototype );
+
+        const playerSize = 10;
+
+        const geometry = new THREE.TetrahedronGeometry(playerSize, 0);
+
+
+        geometry.vertices[0].y = playerSize / 2;
+        geometry.vertices[2].x = playerSize / 2;
+
+
+        const material = new THREE.MeshStandardMaterial({color: 0xF3FFE2});
+        const playerMesh = new THREE.Mesh(geometry, material);
+        playerMesh.position.z = -50;
+        playerMesh.rotation.x = -.4;
+        playerMesh.rotation.z = -2.35;
+        scene.add(playerMesh);
+
+        camera.position.y = 15;
+        camera.rotation.x = -.1;
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === "w") {
+            playerMesh.rotation.x += .01;
+            console.log(playerMesh.rotation.x);
+          } else if (e.key === "s") {
+            playerMesh.rotation.x -= .01;
+            console.log(playerMesh.rotation.x);
+          }
+          if (e.key === "a") {
+            camera.rotation.x += .01;
+            console.log(camera.rotation.x);
+          } else if (e.key === "d") {
+            camera.rotation.x -= .01;
+            console.log(camera.rotation.x);
+          }
+        })
+
+
+
         requestAnimationFrame(render);
 
-        const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 7 }
+        const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 5 }
 
         function render() {
-          cubeArray = update(cubeArray, camera, scene, keyState)
-          renderer.render(scene, camera);
+          // if (gameOn) {
+            // cubeArray = update(cubeArray, camera, scene, keyState, playerMesh)
+            renderer.render(scene, camera);
+          // }
           requestAnimationFrame(render);
         }
 
