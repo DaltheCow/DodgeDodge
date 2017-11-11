@@ -57,7 +57,7 @@
       }
 
       const updateCameraPos = (camera, keyState, playerMesh) => {
-        const turnSpd = .7
+        const turnSpd = .3
         if (keyState.keydown && !(keyState.left && keyState.right)) {
           if (keyState.right) {
             keyState.xAccel = turnSpd;
@@ -80,7 +80,7 @@
         keyState.xSpeed = reduceToLimit(keyState.xSpeed + keyState.xAccel, keyState.maxXSpeed);
         camera.position.x += keyState.xSpeed;
         camera.rotation.z = -.2 * ( keyState.xSpeed / keyState.maxXSpeed )
-        camera.position.z -= 10;
+        camera.position.z -= gameSpeed;
         playerMesh.position.x = camera.position.x;
         playerMesh.rotation.z = camera.rotation.z - 2.35;
         playerMesh.position.z = camera.position.z - 50;
@@ -98,7 +98,8 @@
       const update = (cubeArray, camera, scene, keyState, playerMesh) => {
         const cubeSize = 10;
         updateCameraPos(camera, keyState, playerMesh)
-        if (camera.position.z % 500 === 0) {
+
+        if (-camera.position.z % (gameSpeed * 50) === 0) {
           cubeArray = cubeArray.concat(addCubes(scene, camera, cubeSize));
         }
         removeCubesBang(cubeArray, scene)
@@ -110,7 +111,7 @@
       }
 
       let gameOn = true;
-
+      const gameSpeed = 7;
       (function(){
         let cubeArray = []
         const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("myCanvas"), antialias: true});
@@ -137,7 +138,7 @@
 
         THREE.TetrahedronGeometry.prototype = Object.create( THREE.Geometry.prototype );
 
-        const playerSize = 10;
+        const playerSize = 8;
 
         const geometry = new THREE.TetrahedronGeometry(playerSize, 0);
 
@@ -150,8 +151,13 @@
         const playerMesh = new THREE.Mesh(geometry, material);
         playerMesh.position.z = -50;
         playerMesh.rotation.x = -.4;
-        playerMesh.rotation.z = -2.35;
+        playerMesh.rotation.z = -2.355;
         scene.add(playerMesh);
+
+
+
+
+
 
         camera.position.y = 15;
         camera.rotation.x = -.1;
@@ -177,11 +183,11 @@
 
         requestAnimationFrame(render);
 
-        const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 5 }
+        const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 4 }
 
         function render() {
           // if (gameOn) {
-            // cubeArray = update(cubeArray, camera, scene, keyState, playerMesh)
+            cubeArray = update(cubeArray, camera, scene, keyState, playerMesh)
             renderer.render(scene, camera);
           // }
           requestAnimationFrame(render);
