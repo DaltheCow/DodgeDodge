@@ -39,13 +39,15 @@
         return newPoses.map(pos => addCube(pos.x, 0, pos.z, scene, size));
       }
 
-      const removeCubesBang = (cubeArray, scene) => {
+      const removeCubes = (cubeArray, scene) => {
         if (cubeArray.length > 500) {
           for (let i = 0; i < cubeArray.length - 400; i++) {
             scene.remove(cubeArray[i])
           }
-          cubeArray.splice(0, cubeArray.length - 400)
+
+          return cubeArray.slice(cubeArray.length - 400);
         }
+        return cubeArray;
       }
 
       const reduceToLimit = (num, limit) => {
@@ -57,7 +59,7 @@
       }
 
       const updateCameraPos = (camera, keyState, playerMesh) => {
-        const turnSpd = .3
+        const turnSpd = .25
         if (keyState.keydown && !(keyState.left && keyState.right)) {
           if (keyState.right) {
             keyState.xAccel = turnSpd;
@@ -102,7 +104,7 @@
         if (-camera.position.z % (gameSpeed * 50) === 0) {
           cubeArray = cubeArray.concat(addCubes(scene, camera, cubeSize));
         }
-        removeCubesBang(cubeArray, scene)
+        cubeArray = removeCubes(cubeArray, scene)
         if (doSomethingIfGameIsOver(cubeArray, camera, cubeSize)) {
           gameOn = false;
         }
@@ -112,7 +114,9 @@
 
       let gameOn = true;
       const gameSpeed = 7;
-      (function(){
+      
+      
+      // (function(){
         let cubeArray = []
         const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("myCanvas"), antialias: true});
         renderer.setClearColor(0xCCCCCC);
@@ -138,7 +142,7 @@
 
         THREE.TetrahedronGeometry.prototype = Object.create( THREE.Geometry.prototype );
 
-        const playerSize = 8;
+        const playerSize = 7;
 
         const geometry = new THREE.TetrahedronGeometry(playerSize, 0);
 
@@ -154,36 +158,16 @@
         playerMesh.rotation.z = -2.355;
         scene.add(playerMesh);
 
-
-
-
-
-
         camera.position.y = 15;
         camera.rotation.x = -.1;
-
-        document.addEventListener('keydown', (e) => {
-          if (e.key === "w") {
-            playerMesh.rotation.x += .01;
-            console.log(playerMesh.rotation.x);
-          } else if (e.key === "s") {
-            playerMesh.rotation.x -= .01;
-            console.log(playerMesh.rotation.x);
-          }
-          if (e.key === "a") {
-            camera.rotation.x += .01;
-            console.log(camera.rotation.x);
-          } else if (e.key === "d") {
-            camera.rotation.x -= .01;
-            console.log(camera.rotation.x);
-          }
-        })
-
-
 
         requestAnimationFrame(render);
 
         const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 4 }
+
+
+
+
 
         function render() {
           // if (gameOn) {
@@ -192,6 +176,8 @@
           // }
           requestAnimationFrame(render);
         }
+
+
 
 
         document.addEventListener('keydown', (e) => {
@@ -230,7 +216,7 @@
 
         })
 
-      })();
+      // })();
 
 
     </script>
