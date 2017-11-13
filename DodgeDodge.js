@@ -79,15 +79,17 @@ document.addEventListener('DOMContentLoaded', () => {
     playerMesh.position.x = camera.position.x;
     playerMesh.rotation.z = camera.rotation.z - 2.35;
     playerMesh.position.z = camera.position.z - 50;
-    plane.position.z = camera.position.z -2000
+    plane.position.z = camera.position.z -2000;
+    plane.position.x = camera.position.x;
     
 
   }
 
-  const doSomethingIfGameIsOver = (cubeArray, camera, size) => {
+  const doSomethingIfGameIsOver = (cubeArray, playerMesh, size) => {
     const gameOver = cubeArray.some(cube => (
-      cube.position.x < camera.position.x && cube.position.x + size > camera.position.x &&
-      cube.position.z < camera.position.z && cube.position.z + size > camera.position.z
+      //i am missing to the left and hitting wrong to the right
+      cube.position.x < playerMesh.position.x && cube.position.x + size > playerMesh.position.x &&
+      cube.position.z < playerMesh.position.z && cube.position.z + size > playerMesh.position.z
     ));
     return gameOver
   }
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cubeArray = cubeArray.concat(addCubes(scene, camera, cubeSize));
     }
     cubeArray = removeCubes(cubeArray, scene)
-    if (doSomethingIfGameIsOver(cubeArray, camera, cubeSize)) {
+    if (doSomethingIfGameIsOver(cubeArray, playerMesh, cubeSize)) {
       gameOn = false;
     }
 
@@ -113,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     let cubeArray = []
     const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("myCanvas"), antialias: true});
-    renderer.setClearColor(0xCCCCCC);
+    renderer.setClearColor(0x282c2f);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(400, 300);
 
