@@ -17,6 +17,25 @@ class Game {
     
     this.playerSize = 7;
     this.player = createPlayer(this.playerSize);
+    this.field = new Field(this.cubeGeometry, this.cubeMaterial, this.scene);
+    
+  }
+  
+  newGame() {
+    this.player.position.z = -50;
+    this.player.rotation.x = -0.4;
+    this.player.rotation.z = -2.355;
+    this.gameOn = true;
+    this.gameSpeed = 6;
+    scene.add(this.player);
+    
+    this.camera.position.y = 15;
+    this.camera.rotation.x = -0.1;
+    this.keyState = { keydown: false, right: false, left: false };
+    
+    this.turnState = { xAccel: 0, xSpeed: 0, maxXSpeed: 2.5 };
+    this.startListeners();
+    this.render();
   }
   
   createRenderer() {
@@ -31,40 +50,28 @@ class Game {
     return renderer;
   }
   
-  createPlayer(size) {
-    THREE.TetrahedronGeometry = function ( radius, detail ) {
-        var vertices = [ 0,  0,  0,   0, 1,  0,   1,  0, 0,    0, 0, 1];
-        var indices = [ 2,  1,  0,    0,  3,  2,    1,  3,  0,    2,  3,  1];
-        THREE.PolyhedronGeometry.call( this, vertices, indices, radius, detail );
-    };
-    THREE.TetrahedronGeometry.prototype = Object.create( THREE.Geometry.prototype );
-    
-    const playerGeometry = new THREE.TetrahedronGeometry(size, 0);
-    playerGeometry.vertices[0].y = size / 2;
-    playerGeometry.vertices[2].x = size / 2;
-    
-    const playerMaterial = new THREE.MeshStandardMaterial({color: 0xF3FFE2});
-    const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial);
-    return playerMesh;
+  
+  render() {
+    if (this.gameOn) {
+      cubeArray = update(cubeArray, camera, scene, keyState, playerMesh);
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    }
   }
   
-  newGame() {
-    this.player.position.z = -50;
-    this.player.rotation.x = -0.4;
-    this.player.rotation.z = -2.355;
-    scene.add(this.player);
+  update(cubeArray, camera, scene, keyState, playerMesh) {
+    const cubeSize = 10;
+    updateCameraPos(camera, keyState, playerMesh);
 
-    this.camera.position.y = 15;
-    this.camera.rotation.x = -0.1;
-    this.keyState = { keydown: false, right: false, left: false };
-    
-    this.turnState = { xAccel: 0, xSpeed: 0, maxXSpeed: 2.5 };
-    this.startListeners();
-    //call render and make sure it can end
-  }
-  
-  update() {
-    
+    if (-camera.position.z % (gameSpeed * 50) === 0) {
+      cubeArray = cubeArray.concat(addCubes(scene, camera, cubeSize));
+    }
+    cubeArray = removeCubes(cubeArray, scene);
+    if (doSomethingIfGameIsOver(cubeArray, camera, cubeSize)) {
+      gameOn = false;
+    }
+
+    return cubeArray;
   }
   
   onKeydown(e) {
