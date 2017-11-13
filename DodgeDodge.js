@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       newPoses.push(newPos)
     }
-    return newPoses.map(pos => addCube(pos.x, 0, pos.z, scene, size));
+    return newPoses.map(pos => addCube(pos.x, 3, pos.z, scene, size));
   }
 
   const removeCubes = (cubeArray, scene) => {
@@ -130,24 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     //var material = new THREE.MeshBasicMaterial( { map: texture, transparent: true } ); //save transparent material for later
     
-    var planeGeometry = new THREE.PlaneGeometry( 1000, 4000, 1000);
+    var planeGeometry = new THREE.PlaneGeometry( 1000, 4000);
     var planeMaterial = new THREE.MeshBasicMaterial( {color: 0xBBBBBB, side: THREE.DoubleSide} );
     var plane = new THREE.Mesh( planeGeometry, planeMaterial );
-    plane.position.z = -2000
-    plane.position.y = -10;
+    plane.position.z = -10;
+    plane.position.y = -3;
     plane.rotation.x = -Math.PI/2;
-    document.addEventListener('keypress', (e) => {
-      if (e.key === 's') {
-        plane.rotation.x += .1;
-      } else if (e.key === 'd') {
-        plane.rotation.x -= .1;
-      } else if (e.key === 's') {
-        plane.rotation.z -= .1;
-      } else if (e.key === 'w') {
-        plane.rotation.z += .1;
-      }
-      console.log(plane.rotation.y);
-    })
     
     scene.add( plane );
 
@@ -188,9 +176,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function render() {
       if (gameOn) {
         cubeArray = update(cubeArray, camera, scene, keyState, playerMesh)
+      }
         renderer.render(scene, camera);
         requestAnimationFrame(render);
-      }
     }
 
 
