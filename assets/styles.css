@@ -1,0 +1,51 @@
+.game-container {
+  width: 400px;
+  height: 300px;
+}
+
+.game-contents {
+  margin: 100px auto 0 auto;
+  width: 900px;
+  display: flex;
+  justify-content: space-around;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  background: rgb(40, 44, 47);
+  display: flex;
+  justify-content: center;
+}
+
+.nav {
+  overflow: hidden;
+  background-color: rgb(28, 32, 35);
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.button {
+  padding: 4px 3px;
+  color: #777777;
+  text-align: center;
+  font-size: 40px;
+  margin: 10px 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.side {
+  min-width: 200px;
+  height: 700px;
+  
+}
+
+.left-side {
+  min-width: 200px;
+  height: 700px;
+}
+
+.right-side {
+  
+}

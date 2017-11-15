@@ -88,8 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const doSomethingIfGameIsOver = (cubeArray, playerMesh, size) => {
     const gameOver = cubeArray.some(cube => (
       //i am missing to the left and hitting wrong to the right
-      cube.position.x < playerMesh.position.x && cube.position.x + size > playerMesh.position.x &&
-      cube.position.z < playerMesh.position.z && cube.position.z + size > playerMesh.position.z
+      cube.position.x - size/2 < playerMesh.position.x &&
+      cube.position.x + size/2 > playerMesh.position.x &&
+      cube.position.z - size/2 < playerMesh.position.z + 7 &&
+      cube.position.z + size/2 > playerMesh.position.z - 7
     ));
     return gameOver
   }
@@ -173,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(render);
 
     const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 2.5 }
-
 
     function render() {
       if (gameOn) {
