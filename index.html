@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.min.js" charset="utf-8"></script>
     <script src="DodgeDodge.js" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <script src="https://use.fontawesome.com/04fc163a73.js"></script>
     <link rel="stylesheet" href="assets/styles.css"></link>
     
     <div class="nav">
@@ -16,23 +17,38 @@
       </div>
     </div>
     <div class="game-contents">
-      <div class="side">
-        asdf
+      <div class="panel side">
+        <div class="controls">Controls</div>
+        <div class="arrow-keys">
+          <div class="arrow-key left-arrow">►</div>
+          <div class="arrow-key up-arrow">▲</div>
+          <div class="arrow-key">►</div>
+        </div>
+        <div class="score-txt">
+          Score
+        </div>
+        <div id="score">
+          0
+        </div>
       </div>
       <div class="game-container">
         <canvas id="myCanvas"></canvas>
       </div>
       <div class="side">
-        asdf
-        asdf
-        asdf
-        asdf
-        asdf
-        asdf
-        asdf
-        asdf
-        asdf
-        
+        <div class="personal-info">
+          Created By
+        </div>
+        <div class="personal-info name">
+          Benjamin Blue
+        </div>
+        <div class="personal-links">
+          <ul class="icons">
+								<li><a href="https://github.com/daltheCow/DodgeDodge" class="icon style2 fa fa-github"><span class="label"></span></a></li>
+								<li><a href="https://angel.co/benjamin-blue?al_content=view+your+profile&al_source=transaction_feed%2Fnetwork_sidebar" class="icon style2 fa fa-angellist"><span class="label"></span></a></li>
+								<li><a href="https://www.linkedin.com/in/bluebenjamin/" class="icon style2 fa fa-linkedin"><span class="label"></span></a></li>
+								<!--<li><a href="#" class="icon style2 fa fa-envelope"><span class="label">Email</span></a></li>-->
+							</ul>
+        </div>
       </div>
     </div>
   </body>
