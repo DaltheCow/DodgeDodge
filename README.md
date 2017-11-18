@@ -1,4 +1,4 @@
-## DodgeDodge, A version of [Cube Runner](https://itunes.apple.com/us/app/cube-runner/id284596345?mt=8)/[Cube Field](http://www.yoarcade.net/cubefieldfullscreen.php)
+## DodgeDodge, A version of [Cube Runner](https://itunes.apple.com/us/app/cube-runner/id284596345?mt=8)/[Cube Field](https://framegames.weebly.com/cube-runner.html)
 
 ### Background
 
