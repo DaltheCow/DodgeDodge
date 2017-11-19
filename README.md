@@ -1,10 +1,10 @@
-## DodgeDodge, A version of [Cube Runner](https://itunes.apple.com/us/app/cube-runner/id284596345?mt=8)/[Cube Field](https://framegames.weebly.com/cube-runner.html)
+## Dodge Dodge, A version of [Cube Runner](https://itunes.apple.com/us/app/cube-runner/id284596345?mt=8)/[Cube Field](https://framegames.weebly.com/cube-runner.html)
 
 ### Background
 
-Cube Runner is a time-based 3D driving game
+Cube Runner is a time-based 3D obstacle avoidance game
 
-The player moves forward at an incrementally increasing rate (speed increments each level). There are cubes that randomly spawn and the player has to use the arrow keys to steer around them. Score increases linearly with time.
+The player moves forward at an increasing rate (speed increments each level). There are cubes that randomly spawn and the player has to use the arrow keys to steer around them. Score is determined by distance. If you are feeling pretty good try out the up arrow key every once in a while and boost into speed mode.
 
 ### Functionality & MVP  
 

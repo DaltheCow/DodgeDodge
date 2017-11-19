@@ -1,10 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-  let gameOn = true;
+  let gameOn = false;
   const startGameSpeed = 7.5;
   let gameSpeed = startGameSpeed;
   let lastAddedCubesPos = gameSpeed * 50;
   let paused = false;
+  let backgroundColor = [40, 44, 47];
+  let speedScore = 0;
+  let totalScore = 0;
+  let gameStarted = false;
+  const newGameDisplay = document.querySelector(".new-game");
+  const newGameButton = document.querySelector(".new-game-text");
+  const highScoreDisplay = document.getElementById("high-score");
+  
+  setHighScore();
+  
+  newGameButton.onclick = () => newGame();
   
   let cubeArray = [];
   const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("myCanvas"), antialias: true});
@@ -57,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   playerMesh.position.z = -50;
   playerMesh.rotation.x = -0.4;
   playerMesh.rotation.z = -2.355;
-  scene.add(playerMesh);
+  // scene.add(playerMesh);
 
   camera.position.y = 15;
   camera.rotation.x = -0.1;
@@ -65,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 2.5, up: false };
 
   function newGame() {
+    newGameDisplay.setAttribute("style", "display: none;");
+    scene.children[3] = playerMesh;
     keyState.keydown = false;
     keyState.right = false;
     keyState.left = false;
@@ -82,12 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
     lastAddedCubesPos = gameSpeed * 50;
     scene.children.slice(4).forEach(child => scene.remove(child));
     cubeArray = [];
+    backgroundColor = [40, 44, 47];
+    speedScore = 0;
+    totalScore = 0;
+    gameStarted = true;
   }
 
   requestAnimationFrame(render);
 
   function render() {
-    if (gameOn && !paused) {
+    if (!gameStarted || (gameOn && !paused)) {
       cubeArray = update(cubeArray, camera, scene, keyState, playerMesh);
     }
       renderer.render(scene, camera);
@@ -133,9 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return cubeArray;
   }
 
-  function reduceToLimit(num, limit) {
-    if (Math.abs(num) > limit) {
+  function reduceToLimit(num, limit, lowerLimit) {
+    if (!lowerLimit && Math.abs(num) > limit) {
       return num < 0 ? -limit : limit;
+    } else if (lowerLimit && Math.abs(num) < limit) {
+      return limit;
     } else {
       return num;
     }
@@ -144,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleGameSpeed(camera) {
     const lvlDistanceConst = 15000;
     [1,2,3,4,5].forEach(num => {
-      if (camera.position.z < num * -lvlDistanceConst) {
+      if (totalScore > num * lvlDistanceConst && gameOn) {
         gameSpeed = startGameSpeed + 1 * num;
       }
     });
@@ -198,14 +217,56 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   function updateScore(camera) {
-    const roundedScore = -10 * Math.floor(camera.position.z / 10);
-    document.getElementById("score").innerHTML = roundedScore;
+    if (keyState.up && gameOn) {
+      speedBonus = Math.floor((backgroundColor[0] - 40) / 10);
+      const hasMaxBonus = backgroundColor[0] === 255;
+      speedScore += hasMaxBonus ? 30 : speedBonus;
+    }
+    const roundedScore = -Math.floor(camera.position.z);
+    if (gameOn) {
+      totalScore = speedScore + roundedScore;
+      document.getElementById("score").innerHTML = totalScore;
+    }
+  }
+  
+  function updateScreenColor(keyState) {
+    //if button is down
+    if (keyState.up) {
+      backgroundColor[0] = reduceToLimit(backgroundColor[0] + 1, 255);
+      backgroundColor[1] = reduceToLimit(backgroundColor[1] + 1, 255);
+      backgroundColor[2] = reduceToLimit(backgroundColor[2] + 1, 255);
+    } else {
+      backgroundColor[0] = reduceToLimit(backgroundColor[0] - 3, 40, 'lowerLimit');
+      backgroundColor[1] = reduceToLimit(backgroundColor[1] - 3, 44, 'lowerLimit');
+      backgroundColor[2] = reduceToLimit(backgroundColor[2] - 3, 47, 'lowerLimit');
+    }
+    const [r, g, b] = backgroundColor;
+    //if button is not down
+    document.querySelector("body").setAttribute("style", `background: rgb(${r}, ${g}, ${b});`);
+  }
+  
+  function setHighScore() {
+    let oldScore = Number(localStorage.getItem("highscore"));
+    let newScore = oldScore && oldScore > totalScore ? oldScore : totalScore;
+    localStorage.setItem("highscore", newScore);
+    highScoreDisplay.innerHTML = newScore;
+  }
+  
+  function handleGameOver(scene) {
+    gameOn = false;
+    gameSpeed = startGameSpeed - 3;
+    keyState.up = false;
+    setHighScore();
+    scene.remove(playerMesh);
+    gameStarted = false;
+    newGameDisplay.setAttribute("style", "display: default;");
   }
 
   function update(cubeArray, camera, scene, keyState, playerMesh) {
     const cubeSize = 10;
     updateCameraPos(camera, keyState, playerMesh);
     handleGameSpeed(camera);
+    updateScreenColor(keyState);
     updateScore(camera);
     if ((lastAddedCubesPos - camera.position.z) >= 6 * 50) {
       cubeArray = cubeArray.concat(addCubes(scene, camera, cubeSize));
@@ -213,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     cubeArray = removeCubes(cubeArray, scene);
     if (doSomethingIfGameIsOver(cubeArray, playerMesh, cubeSize)) {
-      gameOn = false;
+      handleGameOver(scene);
     }
 
     return cubeArray;
@@ -226,18 +287,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     switch(e.key) {
       case 'ArrowLeft': {
-        keyState.keydown = true;
-        keyState.left = true;
+        keyState.keydown = true && gameOn;
+        keyState.left = true && gameOn;
         break;
       }
       case 'ArrowRight': {
-        keyState.keydown = true;
-        keyState.right = true;
+        keyState.keydown = true && gameOn;
+        keyState.right = true && gameOn;
         break;
       }
       case 'ArrowUp': {
-        // keyState.keydown = true;
-        keyState.up = true;
+        // keyState.keydown = true && gameOn;
+        keyState.up = true && gameOn;
         break;
       }
       case 'r': {
@@ -245,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
       }
       case 'p': {
-        paused = !paused;
+        paused = gameOn ? !paused : false;
         break;
       }
     }
