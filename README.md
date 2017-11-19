@@ -2,8 +2,8 @@
 
 Try out the [game](https://dalthecow.github.io/DodgeDodge)!
 
-##
-[[/images/DodgeDodge.gif]]
+
+![DodgeDodge demo](/images/DodgeDodge.gif)
 
 ### Background
 
