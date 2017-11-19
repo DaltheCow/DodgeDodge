@@ -25,5 +25,6 @@ The player moves forward at an increasing rate (speed increments at distance lev
 - UI changes
   - Background and cube textures will change appearance on level increases
   - Add clouds for more dramatic 3D feel
+- Make playable on mobile via accelerometer
 
 Coded by Benjamin Blue
