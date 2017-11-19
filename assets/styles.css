@@ -87,11 +87,8 @@
   font-weight: 200;
 }
 
-/*test commit*/
-
 body {
   width: 100vw;
-  height: 100vh;
   background: rgb(40, 44, 47);
   margin: 0;
 }
