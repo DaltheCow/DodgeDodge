@@ -2,7 +2,7 @@
 
 Try out the [game](https://dalthecow.github.io/DodgeDodge)!
 
-[[images/DodgeDodge.gif]]
+[[/images/DodgeDodge.gif]]
 
 ### Background
 
