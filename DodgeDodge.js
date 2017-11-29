@@ -48,9 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   function resizeScreen(isDefault) {
     if(isDefault) {
-      renderer.setSize(window.innerWidth/1.2, window.innerHeight/1.2);
+      renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.2);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+      console.log(window.innerWidth);
+      console.log(window.innerHeight);
     } else {
       renderer.setSize(400, 300);
       camera.aspect = 400 / 300;
