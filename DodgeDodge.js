@@ -9,16 +9,75 @@ document.addEventListener('DOMContentLoaded', () => {
   let speedScore = 0;
   let totalScore = 0;
   let gameStarted = false;
-  const newGameDisplay = document.querySelector(".new-game");
+  const newGameDisplay = Array.from(document.querySelectorAll(".not-score"));
+  
   const newGameButton = document.querySelector(".new-game-text");
   const highScoreDisplay = document.getElementById("high-score");
+  const canvas = document.getElementById("myCanvas");
+  const mobileBtn = document.querySelector(".btn.right");
+  const fullscreenBtn = document.querySelector(".btn.left");
   
+  const body = document.querySelector("body");
+  let exitFS = (document.exitFullscreen ||
+             document.webkitExitFullscreen ||
+             document.mozCancelFullScreen ||
+             document.msExitFullscreen).bind(document);
+             
+  let reqFS = (body.requestFullscreen ||
+             body.webkitRequestFullscreen ||
+             body.mozRequestFullScreen ||
+             body.msRequestFullscreen).bind(body);
+             
+  let fullScreen = false;
+  
+  const toggleFullscreen = () => {
+    if (isMobile) {
+      return;
+    }
+    console.log(fullScreen);
+    if (fullScreen) {
+      exitFS();
+    } else {
+      reqFS();
+    }
+  };
+  
+  fullscreenBtn.onclick = toggleFullscreen;
+  
+  let isMobile = false;
+  
+  function resizeScreen(isDefault) {
+    if(isDefault) {
+      renderer.setSize(window.innerWidth/1.2, window.innerHeight/1.2);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    } else {
+      renderer.setSize(400, 300);
+      camera.aspect = 400 / 300;
+      camera.updateProjectionMatrix();
+    }
+  }
+  
+  function fullScreenUpdate(e) {
+    fullScreen = !fullScreen;
+    resizeScreen(fullScreen);
+  }
+  
+  mobileBtn.onclick = () => {
+    if (!isMobile && fullScreen) {
+      toggleFullscreen();
+    }
+    isMobile = !isMobile;
+    body.classList.toggle("rotate");
+    resizeScreen(isMobile);
+  };
+ 
   setHighScore();
   
   newGameButton.onclick = () => newGame();
   
   let cubeArray = [];
-  const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("myCanvas"), antialias: true});
+  const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
   renderer.setClearColor(0x282c2f);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(400, 300);
@@ -76,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 2.5, up: false };
 
   function newGame() {
-    newGameDisplay.setAttribute("style", "display: none;");
+    newGameDisplay.forEach(el => el.setAttribute("style", "display: none;"));
     scene.children[3] = playerMesh;
     keyState.keydown = false;
     keyState.right = false;
@@ -141,11 +200,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function removeCubes(cubeArray, scene) {
     if (cubeArray.length > 1000) {
-      for (let i = 0; i < cubeArray.length - 800; i++) {
-        scene.remove(cubeArray[i]);
+      const newCubes = [];
+      for (let i = 0; i < cubeArray.length; i++) {
+        if (cubeArray[i].position.z > camera.position.z) {
+          scene.remove(cubeArray[i]);
+        } else {
+          newCubes.push(cubeArray[i]);
+        }
         cubeArray[i] = undefined;
       }
-      return cubeArray.slice(cubeArray.length - 400);
+      
+      return newCubes;
     }
     return cubeArray;
   }
@@ -170,10 +235,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateCameraPos(camera, keyState, playerMesh) {
-    const turnSpd = 0.25;
     if (keyState.up) {
       camera.position.z -= gameSpeed + 3;
     }
+    if (!isMobile) {
+      updateSpeed(keyState);
+    }
+    camera.position.x += keyState.xSpeed;
+    camera.rotation.z = -0.2 * ( keyState.xSpeed / keyState.maxXSpeed );
+    camera.position.z -= gameSpeed;
+    playerMesh.position.x = camera.position.x;
+    playerMesh.rotation.z = camera.rotation.z - 2.35;
+    playerMesh.position.z = camera.position.z - 50;
+    plane.position.z = camera.position.z -2000;
+    plane.position.x = camera.position.x;
+  }
+  
+  function updateSpeed(keyState) {
+    const turnSpd = 0.25;
     if (keyState.keydown && !(keyState.left && keyState.right)) {
       if (keyState.right) {
         keyState.xAccel = turnSpd;
@@ -186,24 +265,15 @@ document.addEventListener('DOMContentLoaded', () => {
           keyState.xSpeed = 0;
           keyState.xAccel = 0;
         } else if (Math.abs(keyState.xSpeed) < 1) {
-          keyState.xAccel = keyState.xSpeed < 0 ? 0.01 : -0.01;
+          keyState.xAccel = keyState.xSpeed < 0 ? 0.03 : -0.03;
         } else {
           keyState.xAccel = keyState.xSpeed < 0 ? 0.2 : -0.2;
         }
       }
     }
     keyState.xSpeed = reduceToLimit(keyState.xSpeed + keyState.xAccel, keyState.maxXSpeed);
-    camera.position.x += keyState.xSpeed;
-    camera.rotation.z = -0.2 * ( keyState.xSpeed / keyState.maxXSpeed );
-    camera.position.z -= gameSpeed;
-    playerMesh.position.x = camera.position.x;
-    playerMesh.rotation.z = camera.rotation.z - 2.35;
-    playerMesh.position.z = camera.position.z - 50;
-    plane.position.z = camera.position.z -2000;
-    plane.position.x = camera.position.x;
-    
-
   }
+  
 
   function doSomethingIfGameIsOver(cubeArray, playerMesh, size) {
     const gameOver = cubeArray.some(cube => (
@@ -226,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (gameOn) {
       totalScore = speedScore + roundedScore;
       document.getElementById("score").innerHTML = totalScore;
+      document.getElementById("score2").innerHTML = totalScore;
     }
   }
   
@@ -256,10 +327,11 @@ document.addEventListener('DOMContentLoaded', () => {
     gameOn = false;
     gameSpeed = startGameSpeed - 3;
     keyState.up = false;
+    keyState.xSpeed = 0;
     setHighScore();
     scene.remove(playerMesh);
     gameStarted = false;
-    newGameDisplay.setAttribute("style", "display: default;");
+    newGameDisplay.forEach(el => el.setAttribute("style", "display: default;"));
   }
 
   function update(cubeArray, camera, scene, keyState, playerMesh) {
@@ -278,6 +350,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     return cubeArray;
+  }
+  
+  function orientationUpdate(e) {
+    let orient = e.gamma;
+    if (orient > 30)
+    orient = 30;
+    if (orient < -30)
+    orient = -30;
+    if (Math.abs(orient) < 2)
+    orient = 0;
+    orient = orient / 30;
+    keyState.xSpeed = orient;
   }
 
 
@@ -333,4 +417,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
   });
+  
+  document.addEventListener('touchstart', (e) => {
+    keyState.up = true;
+  });
+  
+  document.addEventListener('touchend', (e) => {
+    keyState.up = false;
+  });
+  
+  window.addEventListener("deviceorientation", orientationUpdate, false);
+  
+  document.addEventListener("fullscreenchange", fullScreenUpdate, false);
+
+  document.addEventListener("mozfullscreenchange", fullScreenUpdate, false);
+
+  document.addEventListener("webkitfullscreenchange", fullScreenUpdate, false);
+
+  document.addEventListener("msfullscreenchange", fullScreenUpdate, false);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
