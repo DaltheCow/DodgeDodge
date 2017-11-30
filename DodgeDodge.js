@@ -9,12 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
   let speedScore = 0;
   let totalScore = 0;
   let gameStarted = false;
+  let isLandscape = false;
   const newGameDisplay = Array.from(document.querySelectorAll(".not-score"));
+  let isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent));
+  
+  if (isMobile) {
+    document.querySelector(".desktop-instructions").setAttribute("style", "display: none;");
+    document.querySelector(".mobile-instructions").setAttribute("style", "display: block;");
+  }
   
   const newGameButton = document.querySelector(".new-game-text");
   const highScoreDisplay = document.getElementById("high-score");
   const canvas = document.getElementById("myCanvas");
-  const mobileBtn = document.querySelector(".btn.right");
   const fullscreenBtn = document.querySelector(".btn.left");
   
   const body = document.querySelector("body");
@@ -31,10 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let fullScreen = false;
   
   const toggleFullscreen = () => {
-    if (isMobile) {
-      return;
-    }
-    console.log(fullScreen);
     if (fullScreen) {
       exitFS();
     } else {
@@ -44,15 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   fullscreenBtn.onclick = toggleFullscreen;
   
-  let isMobile = false;
   
   function resizeScreen(isDefault) {
     if(isDefault) {
       renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.2);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      console.log(window.innerWidth);
-      console.log(window.innerHeight);
     } else {
       renderer.setSize(400, 300);
       camera.aspect = 400 / 300;
@@ -62,17 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   function fullScreenUpdate(e) {
     fullScreen = !fullScreen;
-    resizeScreen(fullScreen);
+    setTimeout(() => resizeScreen(fullScreen), 0);
   }
-  
-  mobileBtn.onclick = () => {
-    if (!isMobile && fullScreen) {
-      toggleFullscreen();
-    }
-    isMobile = !isMobile;
-    body.classList.toggle("rotate");
-    resizeScreen(isMobile);
-  };
  
   setHighScore();
   
@@ -160,6 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
     speedScore = 0;
     totalScore = 0;
     gameStarted = true;
+    const currOrientation = screen.orientation.type;
+    screen.orientation.lock(currOrientation);
+    // const locOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || screen.orientation.lock;
+    // screen.locOrientation(currOrientation);
   }
 
   requestAnimationFrame(render);
@@ -334,6 +328,10 @@ document.addEventListener('DOMContentLoaded', () => {
     scene.remove(playerMesh);
     gameStarted = false;
     newGameDisplay.forEach(el => el.setAttribute("style", "display: default;"));
+    if (isMobile) {
+      document.querySelector(".desktop-instructions").setAttribute("style", "display: none;");
+      document.querySelector(".mobile-instructions").setAttribute("style", "display: block;");
+    }
   }
 
   function update(cubeArray, camera, scene, keyState, playerMesh) {
@@ -355,15 +353,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   function orientationUpdate(e) {
-    let orient = e.gamma;
+    let orient;
+    const newOrientation = (/.*landscape.*/).test(screen.orientation.type);
+    if (newOrientation !== isLandscape) {
+      resizeScreen(newOrientation);
+    }
+    isLandscape = newOrientation;
+    if (isLandscape) {
+      orient = e.beta;
+    } else {
+      orient = e.gamma;
+    }
     if (orient > 30)
     orient = 30;
     if (orient < -30)
     orient = -30;
-    if (Math.abs(orient) < 2)
-    orient = 0;
-    orient = orient / 30;
-    keyState.xSpeed = orient;
+    orient = orient / 10;
+    if (gameOn) {
+      const landscapePrimary = (/.*primary.*/).test(screen.orientation.type);
+      keyState.xSpeed = (isLandscape && !landscapePrimary ? -1 : 1) * orient;
+    }
   }
 
 
@@ -383,7 +392,6 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
       }
       case 'ArrowUp': {
-        // keyState.keydown = true && gameOn;
         keyState.up = true && gameOn;
         break;
       }
@@ -421,14 +429,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   document.addEventListener('touchstart', (e) => {
-    keyState.up = true;
+    if (gameOn) {
+      keyState.up = true;
+    }
   });
   
   document.addEventListener('touchend', (e) => {
     keyState.up = false;
   });
   
-  window.addEventListener("deviceorientation", orientationUpdate, false);
+  window.addEventListener("deviceorientation", (e) => isMobile && orientationUpdate(e), false);
   
   document.addEventListener("fullscreenchange", fullScreenUpdate, false);
 
@@ -438,21 +448,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener("msfullscreenchange", fullScreenUpdate, false);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
