@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+
+  //initialize global game/view state vars
   let gameOn = false;
   const startGameSpeed = 7.5;
   let gameSpeed = startGameSpeed;
@@ -12,30 +13,35 @@ document.addEventListener('DOMContentLoaded', () => {
   let isLandscape = false;
   const newGameDisplay = Array.from(document.querySelectorAll(".not-score"));
   let isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent));
-  
+
   if (isMobile) {
     document.querySelector(".desktop-instructions").setAttribute("style", "display: none;");
     document.querySelector(".mobile-instructions").setAttribute("style", "display: block;");
   }
-  
+
+  screen.orientation.onchange = function (){
+    const isLandscape = (/.*landscape.*/).test(screen.orientation.type);
+    resizeScreen(fullScreen);
+};
+
   const newGameButton = document.querySelector(".new-game-text");
   const highScoreDisplay = document.getElementById("high-score");
   const canvas = document.getElementById("myCanvas");
   const fullscreenBtn = document.querySelector(".btn.left");
-  
+
   const body = document.querySelector("body");
   let exitFS = (document.exitFullscreen ||
              document.webkitExitFullscreen ||
              document.mozCancelFullScreen ||
              document.msExitFullscreen).bind(document);
-             
+
   let reqFS = (body.requestFullscreen ||
              body.webkitRequestFullscreen ||
              body.mozRequestFullScreen ||
              body.msRequestFullscreen).bind(body);
-             
+
   let fullScreen = false;
-  
+
   const toggleFullscreen = () => {
     if (fullScreen) {
       exitFS();
@@ -43,11 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
       reqFS();
     }
   };
-  
+
   fullscreenBtn.onclick = toggleFullscreen;
-  
-  
+
+
   function resizeScreen(isDefault) {
+    console.log(window.innerWidth);
+    setTimeout(() => console.log(window.innerWidth), 2000);
     if(isDefault) {
       renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.2);
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -58,16 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
       camera.updateProjectionMatrix();
     }
   }
-  
+
   function fullScreenUpdate(e) {
     fullScreen = !fullScreen;
     setTimeout(() => resizeScreen(fullScreen), 0);
   }
- 
+
   setHighScore();
-  
+
   newGameButton.onclick = () => newGame();
-  
+
+
+  //setup three.js objects/variables
+
   let cubeArray = [];
   const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
   renderer.setClearColor(0x282c2f);
@@ -84,15 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const geometry = new THREE.CubeGeometry(10, 10, 10);
   const material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
-  
-  
+
+
   var planeGeometry = new THREE.PlaneGeometry( 1000, 4000);
   var planeMaterial = new THREE.MeshBasicMaterial( {color: 0xBBBBBB, side: THREE.DoubleSide} );
   var plane = new THREE.Mesh( planeGeometry, planeMaterial );
   plane.position.z = -10;
   plane.position.y = -3;
   plane.rotation.x = -Math.PI/2;
-  
+
   scene.add( plane );
 
   THREE.TetrahedronGeometry = function ( radius, detail ) {
@@ -119,11 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
   playerMesh.position.z = -50;
   playerMesh.rotation.x = -0.4;
   playerMesh.rotation.z = -2.355;
-  // scene.add(playerMesh);
 
   camera.position.y = 15;
   camera.rotation.x = -0.1;
-  
+
   const keyState = { keydown: false, right: false, left: false, xAccel: 0, xSpeed: 0, maxXSpeed: 2.5, up: false };
 
   function newGame() {
@@ -165,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderer.render(scene, camera);
       requestAnimationFrame(render);
   }
-  
+
   function addCube(x, y, z, scene, size = 10) {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y, z);
@@ -205,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         cubeArray[i] = undefined;
       }
-      
+
       return newCubes;
     }
     return cubeArray;
@@ -220,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return num;
     }
   }
-  
+
   function handleGameSpeed(camera) {
     const lvlDistanceConst = 15000;
     [1,2,3,4,5].forEach(num => {
@@ -246,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     plane.position.z = camera.position.z -2000;
     plane.position.x = camera.position.x;
   }
-  
+
   function updateSpeed(keyState) {
     const turnSpd = 0.25;
     if (keyState.keydown && !(keyState.left && keyState.right)) {
@@ -269,11 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     keyState.xSpeed = reduceToLimit(keyState.xSpeed + keyState.xAccel, keyState.maxXSpeed);
   }
-  
+
 
   function doSomethingIfGameIsOver(cubeArray, playerMesh, size) {
     const gameOver = cubeArray.some(cube => (
-      //i am missing to the left and hitting wrong to the right
       cube.position.x - size/2 < playerMesh.position.x &&
       cube.position.x + size/2 > playerMesh.position.x &&
       cube.position.z - size/2 < playerMesh.position.z + 7 &&
@@ -281,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ));
     return gameOver;
   }
-  
+
   function updateScore(camera) {
     if (keyState.up && gameOn) {
       speedBonus = Math.floor((backgroundColor[0] - 40) / 10);
@@ -295,9 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById("score2").innerHTML = totalScore;
     }
   }
-  
+
   function updateScreenColor(keyState) {
-    //if button is down
     if (keyState.up) {
       backgroundColor[0] = reduceToLimit(backgroundColor[0] + 1, 255);
       backgroundColor[1] = reduceToLimit(backgroundColor[1] + 1, 255);
@@ -308,17 +316,16 @@ document.addEventListener('DOMContentLoaded', () => {
       backgroundColor[2] = reduceToLimit(backgroundColor[2] - 3, 47, 'lowerLimit');
     }
     const [r, g, b] = backgroundColor;
-    //if button is not down
     document.querySelector("body").setAttribute("style", `background: rgb(${r}, ${g}, ${b});`);
   }
-  
+
   function setHighScore() {
     let oldScore = Number(localStorage.getItem("highscore"));
     let newScore = oldScore && oldScore > totalScore ? oldScore : totalScore;
     localStorage.setItem("highscore", newScore);
     highScoreDisplay.innerHTML = newScore;
   }
-  
+
   function handleGameOver(scene) {
     gameOn = false;
     gameSpeed = startGameSpeed - 3;
@@ -351,14 +358,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return cubeArray;
   }
-  
+
   function orientationUpdate(e) {
     let orient;
-    const newOrientation = (/.*landscape.*/).test(screen.orientation.type);
-    if (newOrientation !== isLandscape) {
-      resizeScreen(newOrientation);
-    }
-    isLandscape = newOrientation;
     if (isLandscape) {
       orient = e.beta;
     } else {
@@ -404,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
       }
     }
-
   });
 
   document.addEventListener('keyup', (e) => {
@@ -425,21 +426,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!keyState.right && !keyState.left) {
       keyState.keydown = false;
     }
-
   });
-  
+
   document.addEventListener('touchstart', (e) => {
     if (gameOn) {
       keyState.up = true;
     }
   });
-  
+
   document.addEventListener('touchend', (e) => {
     keyState.up = false;
   });
-  
+
   window.addEventListener("deviceorientation", (e) => isMobile && orientationUpdate(e), false);
-  
+
   document.addEventListener("fullscreenchange", fullScreenUpdate, false);
 
   document.addEventListener("mozfullscreenchange", fullScreenUpdate, false);
