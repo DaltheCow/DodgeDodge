@@ -10,7 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let speedScore = 0;
   let totalScore = 0;
   let gameStarted = false;
-  let isLandscape = false;
+  let isLandscape = /.*landscape.*/.test(screen.orientation.type);
+  let lastOrient = undefined;
+  let fullScreen = false;
+
   const newGameDisplay = Array.from(document.querySelectorAll(".not-score"));
   let isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent));
 
@@ -19,19 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector(".mobile-instructions").setAttribute("style", "display: block;");
   }
 
-//   screen.orientation.onchange = function (){
-//     let newWidth = window.innerWidth;
-//     let newHeight = window.innerHeight;
-//     setTimeout(() => {
-//       console.log('width b', Wwidth, 'width a', newWidth, 'width timeout', window.innerWidth);
-//       console.log('Height b', Hheight, 'Height a', newHeight, 'Height timeout', window.innerHeight);
-//       Wwidth = window.innerWidth;
-//       Hheight = window.innerHeight;
-//     }, 1000);
-//
-//     // const isLandscape = (/.*landscape.*/).test(screen.orientation.type);
-//     // resizeScreen(fullScreen, true);
-// };
+  window.onresize = function() {
+    if (fullScreen) {
+      resizeScreen(fullScreen, true);
+    }
+  };
 
   const newGameButton = document.querySelector(".new-game-text");
   const highScoreDisplay = document.getElementById("high-score");
@@ -49,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
              body.mozRequestFullScreen ||
              body.msRequestFullscreen).bind(body);
 
-  let fullScreen = false;
 
   const toggleFullscreen = () => {
     if (fullScreen) {
@@ -60,51 +54,18 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   fullscreenBtn.onclick = toggleFullscreen;
-   Wwidth = window.innerWidth;
-   Hheight = window.innerHeight;
-
-  // function untilAsync(callback, test) {
-  //   const cancelId = setTimeout(() => {
-  //     // debugger
-  //     if (test()) {
-  //       callback();
-  //       clearTimeout(cancelId);
-  //     }
-  //   }, 1);
-  // }
 
 
   function resizeScreen(isDefault, wasRotated) {
-    // console.log('Width', window.innerWidth, 'Height', window.innerHeight);
-    // setTimeout(() => console.log('Width', window.innerWidth, 'Height', window.innerHeight), 100)
-    //only do if was on a rotation
-    // const callback = () => {
       if(isDefault) {
         renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.2);
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-        Wwidth = window.innerWidth;
-        Hheight = window.innerHeight;
       } else {
         renderer.setSize(400, 300);
         camera.aspect = 400 / 300;
         camera.updateProjectionMatrix();
-        Wwidth = window.innerWidth;
-        Hheight = window.innerHeight;
       }
-    // };
-
-    // if (wasRotated) {
-    //   let test;
-    //   if (Wwidth > Hheight) {
-    //     test = () => window.innerWidth < window.innerHeight;
-    //   } else {
-    //     test = () => window.innerWidth > window.innerHeight;
-    //   }
-    //   untilAsync(callback, test);
-    // } else {
-    //   callback();
-    // }
   }
 
   function fullScreenUpdate(e) {
@@ -400,23 +361,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function orientationUpdate(e) {
-
-    switch(window.orientation) {
-      case 90:
-      case -90: // portrait;
-        if (isLandscape) {
-          resizeScreen(fullScreen, true);
-          isLandscape = false;
-        }
-        break;
-      default: // landscape
-        if (!isLandscape) {
-          resizeScreen(fullScreen, true);
-          isLandScape = true;
-        }
-        break;
+    if (lastOrient !== undefined && lastOrient !== window.orientation) {
+      resizeScreen(fullScreen, true);
+      isLandscape = Math.abs(window.orientation) === 90;
+      lastOrient = window.orientation;
+    } else if (lastOrient === undefined) {
+      lastOrient = window.orientation;
     }
-
 
     let orient;
     if (isLandscape) {
