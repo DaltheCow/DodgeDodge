@@ -15,12 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let fullScreen = false;
 
   const newGameDisplay = Array.from(document.querySelectorAll(".not-score"));
-  let isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent));
 
-  if (isMobile) {
-    document.querySelector(".desktop-instructions").setAttribute("style", "display: none;");
-    document.querySelector(".mobile-instructions").setAttribute("style", "display: block;");
-  }
+
+  const toggleFullscreen = () => {
+    if (fullScreen) {
+      exitFS();
+    } else {
+      reqFS();
+    }
+  };
+
 
   window.onresize = function() {
     if (fullScreen) {
@@ -32,26 +36,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const highScoreDisplay = document.getElementById("high-score");
   const canvas = document.getElementById("myCanvas");
   const fullscreenBtn = document.querySelector(".btn.left");
-
   const body = document.querySelector("body");
+
   let exitFS = (document.exitFullscreen ||
-             document.webkitExitFullscreen ||
-             document.mozCancelFullScreen ||
-             document.msExitFullscreen).bind(document);
+    document.webkitExitFullscreen ||
+    document.mozCancelFullScreen ||
+    document.msExitFullscreen).bind(document);
 
   let reqFS = (body.requestFullscreen ||
-             body.webkitRequestFullscreen ||
-             body.mozRequestFullScreen ||
-             body.msRequestFullscreen).bind(body);
+    body.webkitRequestFullscreen ||
+    body.mozRequestFullScreen ||
+    body.msRequestFullscreen).bind(body);
 
+  let isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent));
 
-  const toggleFullscreen = () => {
-    if (fullScreen) {
-      exitFS();
-    } else {
-      reqFS();
-    }
+  let fsBool = false;
+  const reqFSMobile = () => {
+    if (fsBool) reqFS();
+    document.removeEventListener('click', reqFSMobile);
   };
+
+  if (isMobile) {
+    document.querySelector(".desktop-instructions").setAttribute("style", "display: none;");
+    document.querySelector(".mobile-instructions").setAttribute("style", "display: block;");
+    setTimeout(() => {
+      fsBool = confirm("Would you like to play in fullscreen? (click anywhere on the screen after)");
+      if (fsBool) {
+
+        document.addEventListener('click', reqFSMobile);
+      }
+    }, 0);
+  }
+
 
   fullscreenBtn.onclick = toggleFullscreen;
 
