@@ -20,6 +20,7 @@ class cubeStore {
     }
   }
 
+  //public api
   addCube(x, y, z) {
     const { storage, cubesInScene, addCubes, scene } = this;
     if (storage.length === 0) {
@@ -31,6 +32,7 @@ class cubeStore {
     cubesInScene.push(mesh);
   }
 
+  //public api
   removeCubes(test) {
     const { scene, cubesInScene, storage } = this;
     const newCubesInScene = [];

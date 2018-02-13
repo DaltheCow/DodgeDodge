@@ -1,3 +1,5 @@
+import cubeStore from './cubeStore.js';
+
 document.addEventListener('DOMContentLoaded', () => {
 
   //initialize global game/view state vars
