@@ -1,4 +1,4 @@
-import cubeStore from './cubeStore.js';
+import CubeStore from './cubeStore.js';
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -98,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //setup three.js objects/variables
 
-  let cubeArray = [];
   const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
   renderer.setClearColor(0x282c2f);
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -115,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const geometry = new THREE.CubeGeometry(10, 10, 10);
   const material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
 
+  const store = new CubeStore(scene, geometry, material, 1000);
 
   var planeGeometry = new THREE.PlaneGeometry( 1000, 4000);
   var planeMaterial = new THREE.MeshBasicMaterial( {color: 0xBBBBBB, side: THREE.DoubleSide} );
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     paused = false;
     lastAddedCubesPos = gameSpeed * 50;
     scene.children.slice(4).forEach(child => scene.remove(child));
-    cubeArray = [];
+    store.reset();
     backgroundColor = [40, 44, 47];
     speedScore = 0;
     totalScore = 0;
@@ -189,17 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function render() {
     if (!gameStarted || (gameOn && !paused)) {
-      cubeArray = update(cubeArray, camera, scene, keyState, playerMesh);
+      update(camera, scene, keyState, playerMesh);
     }
       renderer.render(scene, camera);
       requestAnimationFrame(render);
-  }
-
-  function addCube(x, y, z, scene, size = 10) {
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    return mesh;
   }
 
   function canPlaceCube(pos1, pos2, size = 10) {
@@ -216,28 +209,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const x = Math.floor(Math.random() * 2000) - 1000 + camera.position.x;
         const z = Math.floor(Math.random() * 480) - 1490 + camera.position.z;
         newPos = { x, z };
-        valid = !newPoses.some(pos => !canPlaceCube(pos, newPos, 10));
+        valid = !newPoses.some(pos => !canPlaceCube(pos, newPos, size));
       }
       newPoses.push(newPos);
     }
-    return newPoses.map(pos => addCube(pos.x, 3, pos.z, scene, size));
+    const pos_y = 3;
+    newPoses.forEach(pos => store.addCube(pos.x, pos_y, pos.z));
   }
 
-  function removeCubes(cubeArray, scene) {
-    if (cubeArray.length > 1000) {
-      const newCubes = [];
-      for (let i = 0; i < cubeArray.length; i++) {
-        if (cubeArray[i].position.z > camera.position.z) {
-          scene.remove(cubeArray[i]);
-        } else {
-          newCubes.push(cubeArray[i]);
-        }
-        cubeArray[i] = undefined;
-      }
-
-      return newCubes;
+  function removeCubes(camera) {
+    if (store.length > 1000) {
+      store.removeCubes(cube => cube.position.z > camera.position.z);
     }
-    return cubeArray;
   }
 
   function reduceToLimit(num, limit, lowerLimit) {
@@ -300,8 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  function doSomethingIfGameIsOver(cubeArray, playerMesh, size) {
-    const gameOver = cubeArray.some(cube => (
+  function doSomethingIfGameIsOver(playerMesh, size) {
+    const gameOver = store.some(cube => (
       cube.position.x - size/2 < playerMesh.position.x &&
       cube.position.x + size/2 > playerMesh.position.x &&
       cube.position.z - size/2 < playerMesh.position.z + 7 &&
@@ -360,22 +343,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function update(cubeArray, camera, scene, keyState, playerMesh) {
+  function update(camera, scene, keyState, playerMesh) {
     const cubeSize = 10;
     updateCameraPos(camera, keyState, playerMesh);
     handleGameSpeed(camera);
     updateScreenColor(keyState);
     updateScore(camera);
     if ((lastAddedCubesPos - camera.position.z) >= 6 * 50) {
-      cubeArray = cubeArray.concat(addCubes(scene, camera, cubeSize));
+      addCubes(camera, cubeSize);
       lastAddedCubesPos = camera.position.z;
     }
-    cubeArray = removeCubes(cubeArray, scene);
-    if (doSomethingIfGameIsOver(cubeArray, playerMesh, cubeSize)) {
+    removeCubes(camera);
+    if (doSomethingIfGameIsOver(playerMesh, cubeSize)) {
       handleGameOver(scene);
     }
-
-    return cubeArray;
   }
 
   function orientationUpdate(e) {

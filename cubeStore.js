@@ -1,4 +1,4 @@
-class cubeStore {
+class CubeStore {
   constructor(scene, geometry, material, initialSize) {
     this.scene = scene;
     this.geometry = geometry;
@@ -32,7 +32,6 @@ class cubeStore {
     cubesInScene.push(mesh);
   }
 
-  //public api
   removeCubes(test) {
     let { scene, cubesInScene, storage } = this;
     const newCubesInScene = [];
@@ -55,6 +54,15 @@ class cubeStore {
     });
     cubesInScene = [];
   }
+
+  length() {
+    return this.cubesInScene.length;
+  }
+
+  some(test) {
+    this.cubesInScene.some(test);
+  }
+
 }
 
-export default cubeStore;
+export default CubeStore;
