@@ -93,8 +93,10 @@ class CubeStore {
 
 #### This data structure allows me to easily reuse the three.js mesh objects
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The addCube method simply takes a mesh and puts it into the scene at the given position
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The removeCubes method takes a test function and removes every passing mesh from the scene
 * Increases performance
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the game creates too many mesh objects, it begins to slow down. For some reason the three.js library doesn't properly garbage collect these mesh objects.
 * Dynamically resizes
 
