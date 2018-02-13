@@ -21,14 +21,15 @@ class cubeStore {
   }
 
   addCube(x, y, z) {
-    const { storage, cubesInScene, addCubes } = this;
+    const { storage, cubesInScene, addCubes, scene } = this;
     if (storage.length === 0) {
       addCubes(cubesInScene.length);
     }
     const mesh = storage.pop();
     mesh.position.set(x, y, z);
     scene.add(mesh);
-    return mesh;
   }
+
+  
 
 }
