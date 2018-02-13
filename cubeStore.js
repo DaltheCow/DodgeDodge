@@ -5,7 +5,7 @@ class CubeStore {
     this.material = material;
     this.storage = [];
     this.cubesInScene = [];
-    this.addCubes(raiseToLimit(initialize, 1));
+    this.addCubes(this.raiseToLimit(initialSize, 1));
   }
 
   raiseToLimit(num, limit) {
@@ -24,7 +24,7 @@ class CubeStore {
   addCube(x, y, z) {
     const { storage, cubesInScene, addCubes, scene } = this;
     if (storage.length === 0) {
-      addCubes(cubesInScene.length);
+      this.addCubes(cubesInScene.length);
     }
     const mesh = storage.pop();
     mesh.position.set(x, y, z);
@@ -43,7 +43,7 @@ class CubeStore {
         newCubesInScene.push(mesh);
       }
     });
-    cubesInScene = newCubesInScene;
+    this.cubesInScene = newCubesInScene;
   }
 
   reset() {
@@ -52,7 +52,7 @@ class CubeStore {
       scene.remove(mesh);
       storage.push(mesh);
     });
-    cubesInScene = [];
+    this.cubesInScene = [];
   }
 
   length() {
@@ -60,7 +60,7 @@ class CubeStore {
   }
 
   some(test) {
-    this.cubesInScene.some(test);
+    return this.cubesInScene.some(test);
   }
 
 }

@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return !(Math.abs(pos1.x - pos2.x) < size && Math.abs(pos1.z - pos2.z) < size);
   }
 
-  function addCubes(scene, camera, size = 10) {
+  function addCubes(camera, size = 10) {
     const numCubes = Math.floor(Math.random() * 10) + 75;
     const newPoses = [];
     for (let i = 0; i < numCubes; i++) {
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateScore(camera) {
     if (keyState.up && gameOn) {
-      speedBonus = Math.floor((backgroundColor[0] - 40) / 10);
+      let speedBonus = Math.floor((backgroundColor[0] - 40) / 10);
       const hasMaxBonus = backgroundColor[0] === 255;
       speedScore += hasMaxBonus ? 30 : speedBonus;
     }
