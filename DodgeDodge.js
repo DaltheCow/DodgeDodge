@@ -179,10 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
     speedScore = 0;
     totalScore = 0;
     gameStarted = true;
-    const currOrientation = screen.orientation.type;
-    screen.orientation.lock(currOrientation);
-    // const locOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || screen.orientation.lock;
-    // screen.locOrientation(currOrientation);
+    if (isMobile) {
+      const currOrientation = screen.orientation.type;
+      screen.orientation.lock(currOrientation);
+      const locOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+      screen.locOrientation(currOrientation);
+    }
   }
 
   requestAnimationFrame(render);
