@@ -34,15 +34,26 @@ class cubeStore {
 
   //public api
   removeCubes(test) {
-    const { scene, cubesInScene, storage } = this;
+    let { scene, cubesInScene, storage } = this;
     const newCubesInScene = [];
     cubesInScene.forEach(mesh => {
       if (test(mesh)) {
+        scene.remove(mesh);
         storage.push(mesh);
       } else {
         newCubesInScene.push(mesh);
       }
     });
+    cubesInScene = newCubesInScene;
+  }
+
+  reset() {
+    let { storage, cubesInScene, scene } = this;
+    cubesInScene.forEach(mesh => {
+      scene.remove(mesh);
+      storage.push(mesh);
+    });
+    cubesInScene = [];
   }
 }
 
