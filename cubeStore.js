@@ -28,8 +28,20 @@ class cubeStore {
     const mesh = storage.pop();
     mesh.position.set(x, y, z);
     scene.add(mesh);
+    cubesInScene.push(mesh);
   }
 
-  
-
+  removeCubes(test) {
+    const { scene, cubesInScene, storage } = this;
+    const newCubesInScene = [];
+    cubesInScene.forEach(mesh => {
+      if (test(mesh)) {
+        storage.push(mesh);
+      } else {
+        newCubesInScene.push(mesh);
+      }
+    });
+  }
 }
+
+export default cubeStore;
