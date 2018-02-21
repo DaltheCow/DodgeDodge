@@ -193,8 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!gameStarted || (gameOn && !paused)) {
       update(camera, scene, keyState, playerMesh);
     }
-      renderer.render(scene, camera);
-      requestAnimationFrame(render);
+    renderer.render(scene, camera);
+    requestAnimationFrame(render);
   }
 
   function canPlaceCube(pos1, pos2, size = 10) {
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function removeCubes(camera) {
-    if (store.length > 1000) {
+    if (store.length() > 1000) {
       store.removeCubes(cube => cube.position.z > camera.position.z);
     }
   }
